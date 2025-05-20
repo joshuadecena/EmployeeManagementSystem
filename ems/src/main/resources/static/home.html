@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Dashboard</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background-color: #f0f4f8; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; background: #fff; }
+    th, td { padding: 10px; border: 1px solid #ccc; }
+    th { background-color: #efefef; }
+    button { margin-top: 20px; padding: 10px 15px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <center><h1>Employee Dashboard</h1></center>
+  	<br><br>
+  <p id="welcomeMsg">Welcome!</p>
+	<br></br>
+  <h3>Average Stats</h3>
+  <hr></hr>	
+  <p>Average Salary: <span id="avgSalary">Loading...</span></p>
+  <p>Average Age: <span id="avgAge">Loading...</span></p>
+	<br></br>
+	
+  <h3>Add New Employee</h3>
+	<form id="empForm">
+		<input type = "text" placeholder ="Name" id="name" required>
+		<input type = "text" placeholder ="Department" id="department" required>
+		<input type = "date" id = "dob" required>
+		<input type = "number" placeholder = "Salary" id="salary" required>
+		<button type = "submit">Add Employee</button>
+	</form>
+  
+  <h3>Employees</h3>
+  <table id="empTable">
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Department</th><th>DOB</th><th>Salary</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button onclick="logout()">Logout</button>
+
+  <script>
+    async function fetchDashboard() {
+      const opts = { credentials: "include" }; // Include cookies
+      const [empRes, salaryRes, ageRes] = await Promise.all([
+        fetch("/api/employees", opts),
+        fetch("/api/employees/average-salary", opts),
+        fetch("/api/employees/average-age", opts)
+      ]);
+
+      if (empRes.status === 401) {
+        window.location.href = "/login"; // Redirect to Spring login
+        return;
+      }
+
+      const employees = await empRes.json();
+      document.getElementById("avgSalary").textContent = await salaryRes.text();
+      document.getElementById("avgAge").textContent = await ageRes.text();
+
+      const tbody = document.querySelector("#empTable tbody");
+      tbody.innerHTML = "";
+      employees.forEach(emp => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${emp.id}</td>
+          <td>${emp.name}</td>
+          <td>${emp.department}</td>
+          <td>${emp.dateOfBirth}</td>
+          <td>${emp.salary}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function logout() {
+      fetch("/logout", { method: "POST", credentials: "include" })
+        .then(() => window.location.href = "/login");
+    }
+
+    fetchDashboard();
+  </script>
+</body>
+</html>
