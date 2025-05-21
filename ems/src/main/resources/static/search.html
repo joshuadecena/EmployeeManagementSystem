@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search Employees</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    .sort-button {
+      cursor: pointer;
+      font-size: 0.8rem;
+      user-select: none;
+      margin-left: 6px;
+      color: #ddd;
+      user-select: none;
+    }
+    .sort-button.active {
+      color: #fff;
+    }
+    th {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Employee Management System</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="search.html">Search</a></li>
+          <li class="nav-item"><a class="nav-link" href="add.html">Add</a></li>
+          <li class="nav-item"><a class="nav-link" href="update.html">Update</a></li>
+          <li class="nav-item"><a class="nav-link" href="delete.html">Delete</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+    <h1 class="mb-4 text-center">Search Employee</h1>
+
+    <!-- Search Form -->
+    <form id="searchForm" class="row g-3 mb-3">
+      <div class="col-md-2">
+        <input type="number" class="form-control" id="searchId" placeholder="ID" min="1" />
+      </div>
+      <div class="col-md-3">
+        <input type="text" class="form-control" id="searchName" placeholder="Name" />
+      </div>
+      <div class="col-md-3">
+        <select id="searchDepartment" class="form-select">
+          <option value="">-- Department --</option>
+          <option value="IT">IT</option>
+          <option value="HR">HR</option>
+          <option value="Finance">Finance</option>
+          <option value="Marketing">Marketing</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input type="number" class="form-control" id="searchMinAge" placeholder="Age" min="18" />
+      </div>
+      <div class="col-md-1 d-grid">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+      <div class="col-md-1 d-grid">
+        <button type="button" id="resetButton" class="btn btn-secondary">Reset</button>
+      </div>
+    </form>
+
+    <!-- RESULTS TABLE -->
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>
+            ID
+            <span class="sort-button" data-column="id" data-order="asc" title="Sort ascending">&#9650;</span>
+          </th>
+          <th>
+            Name
+            <span class="sort-button" data-column="name" data-order="asc" title="Sort ascending">&#9650;</span>
+          </th>
+          <th>
+            Department
+            <span class="sort-button" data-column="department" data-order="asc" title="Sort ascending">&#9650;</span>
+          </th>
+          <th>
+            Age
+            <span class="sort-button" data-column="age" data-order="asc" title="Sort ascending">&#9650;</span>
+          </th>
+          <th>
+            Salary
+            <span class="sort-button" data-column="salary" data-order="asc" title="Sort ascending">&#9650;</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody">
+        <tr><td colspan="5" class="text-center">No results yet</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <!-- SCRIPTS -->
+  <script>
+    const searchForm = document.getElementById("searchForm");
+    const resultsBody = document.getElementById("resultsBody");
+    let currentEmployees = [];
+    let currentSortColumn = "id";
+    let currentSortOrder = "asc";
+
+    async function fetchEmployees(queryParams = "") {
+      try {
+        const response = await fetch(`/api/employees/search${queryParams}`);
+        if (!response.ok) throw new Error("Failed to fetch data");
+
+        const data = await response.json();
+        currentEmployees = data || [];
+        if(currentSortColumn) {
+          sortAndRender(currentSortColumn, currentSortOrder);
+        } else {
+          renderTable(currentEmployees);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        resultsBody.innerHTML = `<tr><td colspan="5" class="text-danger text-center">Error loading results</td></tr>`;
+      }
+    }
+
+    function renderTable(data) {
+      resultsBody.innerHTML = "";
+      if (!data.length) {
+        resultsBody.innerHTML = `<tr><td colspan="5" class="text-center">No matching employees found.</td></tr>`;
+        return;
+      }
+      data.forEach(emp => {
+        const deptName = emp.department?.name || emp.department || "N/A";
+        const age = emp.age ?? "N/A";
+        const salary = emp.salary !== undefined ? Number(emp.salary).toFixed(2) : "N/A";
+
+        const row = `
+          <tr>
+            <td>${emp.id}</td>
+            <td>${emp.name}</td>
+            <td>${deptName}</td>
+            <td>${age}</td>
+            <td>${salary}</td>
+          </tr>
+        `;
+        resultsBody.innerHTML += row;
+      });
+    }
+
+    function compareValues(key, order = 'asc') {
+      return function(a, b) {
+        let valA = a[key];
+        let valB = b[key];
+
+        if (key === "department") {
+          valA = valA?.name || valA || "";
+          valB = valB?.name || valB || "";
+        }
+
+        if (valA === undefined || valA === null) valA = "";
+        if (valB === undefined || valB === null) valB = "";
+
+        if (key === "id" || key === "age" || key === "salary") {
+          valA = Number(valA);
+          valB = Number(valB);
+          if (isNaN(valA)) valA = order === 'asc' ? Infinity : -Infinity;
+          if (isNaN(valB)) valB = order === 'asc' ? Infinity : -Infinity;
+        }
+
+        if (valA < valB) return order === 'asc' ? -1 : 1;
+        if (valA > valB) return order === 'asc' ? 1 : -1;
+        return 0;
+      };
+    }
+
+    function updateSortIcons(activeColumn, order) {
+      const buttons = document.querySelectorAll(".sort-button");
+      buttons.forEach(btn => {
+        if (btn.dataset.column === activeColumn) {
+          btn.classList.add("active");
+          btn.innerHTML = order === "asc" ? "&#9650;" : "&#9660;";
+          btn.dataset.order = order;
+          btn.title = `Sort ${order === "asc" ? "descending" : "ascending"}`;
+        } else {
+          btn.classList.remove("active");
+          btn.innerHTML = "&#9650;";
+          btn.dataset.order = "asc";
+          btn.title = "Sort ascending";
+        }
+      });
+    }
+
+    function sortAndRender(column, order) {
+      currentEmployees.sort(compareValues(column, order));
+      renderTable(currentEmployees);
+      updateSortIcons(column, order);
+      currentSortColumn = column;
+      currentSortOrder = order;
+    }
+
+    // Sort buttons event listeners
+    document.querySelectorAll(".sort-button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const column = btn.dataset.column;
+        let order = btn.dataset.order;
+
+        // Toggle order
+        order = order === "asc" ? "desc" : "asc";
+
+        sortAndRender(column, order);
+      });
+    });
+
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const id = document.getElementById("searchId").value.trim();
+      const name = document.getElementById("searchName").value.trim();
+      const department = document.getElementById("searchDepartment").value.trim();
+      const minAge = document.getElementById("searchMinAge").value.trim();
+
+      const params = new URLSearchParams();
+      if (id) params.append("id", id);
+      if (name) params.append("name", name);
+      if (department) params.append("department", department);
+      if (minAge) params.append("minAge", minAge);
+
+      const query = params.toString() ? `?${params.toString()}` : "";
+      fetchEmployees(query);
+    });
+
+    document.getElementById("resetButton").addEventListener("click", () => {
+      // Clear filters
+      document.getElementById("searchId").value = "";
+      document.getElementById("searchName").value = "";
+      document.getElementById("searchDepartment").value = "";
+      document.getElementById("searchMinAge").value = "";
+
+      // Reset sort state to default
+      currentSortColumn = "id";
+      currentSortOrder = "asc";
+      updateSortIcons(currentSortColumn, currentSortOrder);
+
+      // Fetch and display all employees
+      fetchEmployees();
+    });
+
+    // On page load, show the full list of employees
+    fetchEmployees();
+    updateSortIcons(currentSortColumn, currentSortOrder);
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -16,6 +16,10 @@ public abstract class Person {
 	public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 	
 	public int getAge() {
-		return Period.between(dateOfBirth, LocalDate.now()).getYears();
+	    if (dateOfBirth == null) {
+	        return 0; // or some default value or throw a custom exception
+	    }
+	    return Period.between(dateOfBirth, LocalDate.now()).getYears();
 	}
+
 }

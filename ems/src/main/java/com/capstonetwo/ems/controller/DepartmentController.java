@@ -11,21 +11,21 @@ import java.util.List;
 @RequestMapping("/api/departments")
 public class DepartmentController {
 
-    @Autowired
-    private DepartmentService departmentService;
+	@Autowired
+	private DepartmentService departmentService;
 
-    @GetMapping
-    public List<Department> getAll() {
-        return departmentService.getAll();
-    }
+	@GetMapping
+	public List<Department> getAll() {
+		return departmentService.getAll();
+	}
 
-    @GetMapping("/{id}")
-    public Department getById(@PathVariable Long id) {
-        return departmentService.getById(id);
-    }
+	@GetMapping("/{id}")
+	public Department getById(@PathVariable Long id) {
+		return departmentService.getById(id);
+	}
 
-    // ❌ Remove these:
-    // @PostMapping
-    // @PutMapping
-    // @DeleteMapping
+	// ❌ Remove these:
+	// @PostMapping
+	// @PutMapping
+	// @DeleteMapping
 }

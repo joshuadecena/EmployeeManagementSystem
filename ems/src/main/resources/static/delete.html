@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Update Employee</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="home.html">Employee Management System</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="home.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="search.html">Search</a></li>
+          <li class="nav-item"><a class="nav-link" href="add.html">Add</a></li>
+          <li class="nav-item"><a class="nav-link" href="update.html">Update</a></li>
+          <li class="nav-item"><a class="nav-link active" href="delete.html">Delete</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1 class="text-center mb-4">Delete Employee</h1>
+
+    <!-- Search Filters -->
+    <form id="searchForm" class="row g-3 mb-4">
+      <div class="col-md-2">
+        <input type="number" class="form-control" id="searchId" placeholder="ID" min="1" />
+      </div>
+      <div class="col-md-3">
+        <input type="text" class="form-control" id="searchName" placeholder="Name" />
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" id="searchDepartment">
+          <option value="">All Departments</option>
+          <option value="IT">IT</option>
+          <option value="HR">HR</option>
+          <option value="Finance">Finance</option>
+          <option value="Marketing">Marketing</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input type="number" class="form-control" id="searchMinAge" placeholder="Min Age" min="18" />
+      </div>
+      <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </form>
+
+    <!-- Search Results Table -->
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Age</th>
+            <th>Salary</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+          <tr><td colspan="6" class="text-center">No search performed yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS Bundle (Popper included) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const searchForm = document.getElementById('searchForm');
+    const resultsBody = document.getElementById('resultsBody');
+
+    // Helper: fetch and display employees matching filters
+    async function fetchEmployees(filters) {
+      try {
+        const params = new URLSearchParams(filters);
+        const res = await fetch(`/api/employees/search?${params.toString()}`, { credentials: "include" });
+        if (!res.ok) throw new Error('Failed to fetch employees');
+        const data = await res.json();
+
+        // Clear old rows
+        resultsBody.innerHTML = '';
+
+        if (!data.length) {
+          resultsBody.innerHTML = `<tr><td colspan="6" class="text-center">No employees found</td></tr>`;
+          return;
+        }
+
+        // Populate rows
+        data.forEach(emp => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${emp.id}</td>
+            <td>${emp.name}</td>
+            <td>${emp.department?.name || emp.department || 'N/A'}</td>
+            <td>${emp.age || 'N/A'}</td>
+            <td>${emp.salary || 'N/A'}</td>
+            <td>
+              <button class="btn btn-danger btn-sm remove-btn" data-id="${emp.id}">Remove</button>
+            </td>
+          `;
+          resultsBody.appendChild(tr);
+        });
+
+        // Attach remove event listeners
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+          btn.addEventListener('click', handleRemoveClick);
+        });
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Remove button handler
+    function handleRemoveClick(event) {
+      const empId = event.target.getAttribute('data-id');
+      if (!empId) return;
+
+      if (confirm(`Are you sure you want to remove employee ID ${empId}? This action cannot be undone.`)) {
+        // Call API to delete
+        fetch(`/api/employees/${empId}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to remove employee');
+          alert('Employee removed successfully.');
+          // Refresh search results by re-submitting current filters
+          searchForm.dispatchEvent(new Event('submit'));
+        })
+        .catch(err => alert(err.message));
+      }
+    }
+
+    // Search form submit handler
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const filters = {
+        id: document.getElementById('searchId').value.trim(),
+        name: document.getElementById('searchName').value.trim(),
+        department: document.getElementById('searchDepartment').value,
+        minAge: document.getElementById('searchMinAge').value.trim(),
+      };
+
+      // Remove empty filters to keep query clean
+      for (const key in filters) {
+        if (!filters[key]) delete filters[key];
+      }
+
+      fetchEmployees(filters);
+    });
+  </script>
+</body>
+</html>
