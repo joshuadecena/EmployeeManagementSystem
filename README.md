@@ -1,48 +1,67 @@
-Capstone Project: Employee Management System 
-Project Overview 
-Develop an Employee Management System using Core Java (J2SE) with an emphasis on object-oriented 
-programming principles such as abstrac on, polymorphism, inheritance, and encapsula on. The system will 
-include valida on and excep on handling for inputs, looping, use of collec on interfaces, and abstract classes. 
-The project will also involve basic input, processing, saving results into a MySQL database, retrieving, and 
-displaying data. Addi onally, it will include unit tes ng and a web interface using HTML, JavaScript, CSS, and 
-Spring Boot. 
-Func onal Requirements 
-1. User Authen ca on 
-o Login, Logout 
-2. Employee Management 
-o View, Add, Update, Delete, Search employee 
-3. Input Parameters 
-o Employee ID 
-o Name 
-o Date of birth 
-o Department 
-o Salary 
-4. Processing 
-o Calculate the average salary of employees 
-o Calculate the average age of employees 
-5. Database Opera ons 
-o Save employee details into a MySQL database 
-o Retrieve employee details 
-o Display employee details 
-6. Report  
-o Display list of employees 
-1. By Department 
-2. By Age 
-Technology Stack 
- Frontend: HTML, JavaScript, CSS 
- Backend: Core Java (J2SE), Spring Boot 
- Database: MySQL 
- Tes ng: JUnit 
-Implementa on Details 
-1. Object-Oriented Programming Principles 
-o Abstrac on: Create abstract classes for common func onali es. 
-o Polymorphism: Use method overriding and interfaces. 
-o Inheritance: Create a base class for common a ributes and methods. 
-o Encapsula on: Use private fields and public ge er/se er methods. 
-2. Valida on and Excep on Handling 
-o Validate user inputs (e.g., non-empty fields, valid age range). 
-o Handle excep ons (e.g., invalid input, database connec on errors). 
-3. Collec on Interface 
-o Use collec ons (e.g., ArrayList) to manage employee data. 
-4. Abstract Class 
-o Create an abstract class Person with common a ributes (e.g., name, date of birth).
+# Capstone Project: Employee Management System
+
+## Project Overview
+Develop an Employee Management System using Core Java (J2SE) with an emphasis on object-oriented programming principles such as abstraction, polymorphism, inheritance, and encapsulation. The system will include validation and exception handling for inputs, looping, use of collection interfaces, and abstract classes.
+
+The project will also involve basic input, processing, saving results into a MySQL database, retrieving, and displaying data. Additionally, it will include unit testing and a web interface using HTML, JavaScript, CSS, and Spring Boot.
+
+---
+
+## Functional Requirements
+
+1. **User Authentication**
+   - Login, Logout
+
+2. **Employee Management**
+   - View, Add, Update, Delete, Search employee
+
+3. **Input Parameters**
+   - Employee ID
+   - Name
+   - Date of birth
+   - Department
+   - Salary
+
+4. **Processing**
+   - Calculate the average salary of employees
+   - Calculate the average age of employees
+
+5. **Database Operations**
+   - Save employee details into a MySQL database
+   - Retrieve employee details
+   - Display employee details
+
+6. **Report**
+   - Display list of employees
+     1. By Department
+     2. By Age
+
+---
+
+## Technology Stack
+
+- **Frontend:** HTML, JavaScript, CSS  
+- **Backend:** Core Java (J2SE), Spring Boot  
+- **Database:** MySQL  
+- **Testing:** JUnit
+
+---
+
+## Implementation Details
+
+1. **Object-Oriented Programming Principles**
+   - **Abstraction:** Create abstract classes for common functionalities.  
+   - **Polymorphism:** Use method overriding and interfaces.  
+   - **Inheritance:** Create a base class for common attributes and methods.  
+   - **Encapsulation:** Use private fields and public getter/setter methods.
+
+2. **Validation and Exception Handling**
+   - Validate user inputs (e.g., non-empty fields, valid age range).  
+   - Handle exceptions (e.g., invalid input, database connection errors).
+
+3. **Collection Interface**
+   - Use collections (e.g., ArrayList) to manage employee data.
+
+4. **Abstract Class**
+   - Create an abstract class `Person` with common attributes (e.g., name, date of birth).
+
