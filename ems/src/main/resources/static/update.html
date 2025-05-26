@@ -81,12 +81,12 @@
     <table class="table table-bordered table-striped">
       <thead class="table-dark">
         <tr>
-          <th>ID <span class="sort-button active" data-column="id" data-order="asc">&#9650;</span></th>
-          <th>Name <span class="sort-button" data-column="name" data-order="asc">&#9650;</span></th>
-          <th>Department <span class="sort-button" data-column="department" data-order="asc">&#9650;</span></th>
-          <th>Date of Birth <span class="sort-button" data-column="dateOfBirth" data-order="asc">&#9650;</span></th>
-          <th>Age <span class="sort-button" data-column="age" data-order="asc">&#9650;</span></th>
-          <th>Salary <span class="sort-button" data-column="salary" data-order="asc">&#9650;</span></th>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Date of Birth</th>
+          <th>Age</th>
+          <th>Salary</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -124,10 +124,13 @@
             <label for="editDateOfBirth" class="form-label">Date of Birth</label>
             <input type="date" id="editDateOfBirth" class="form-control" required />
           </div>
-          <div class="mb-3">
-            <label for="editSalary" class="form-label">Salary</label>
-            <input type="number" step="0.01" min="0" id="editSalary" class="form-control" required />
-          </div>
+		  <div class="mb-3">
+		    <label for="editSalary" class="form-label">Salary</label>
+		    <div class="input-group">
+		      <span class="input-group-text">₱</span>
+		      <input type="number" step="0.01" min="0" id="editSalary" class="form-control" required />
+		    </div>
+		  </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -175,7 +178,9 @@
       const dept = emp.department?.name || emp.department || "N/A";
       const dob = formatDate(emp.dateOfBirth);
       const age = emp.dateOfBirth ? calculateAge(emp.dateOfBirth) : "N/A";
-      const salary = emp.salary !== undefined ? Number(emp.salary).toFixed(2) : "N/A";
+	  const salary = emp.salary !== undefined
+	    ? `₱${Number(emp.salary).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`
+	    : "N/A";
       return `
         <tr data-id="${emp.id}">
           <td>${emp.id}</td>

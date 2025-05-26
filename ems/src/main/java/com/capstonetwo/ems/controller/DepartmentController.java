@@ -24,7 +24,7 @@ public class DepartmentController {
 		return departmentService.getById(id);
 	}
 
-	// ❌ Remove these:
+	// Removing this because I will not add, edit, or delete departments
 	// @PostMapping
 	// @PutMapping
 	// @DeleteMapping

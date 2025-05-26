@@ -22,4 +22,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             @Param("name") String name,
             @Param("department") String department,
             @Param("minDateOfBirth") LocalDate minDateOfBirth);
+
 }
+// This interface extends JpaRepository to provide CRUD operations for Employee entities.
+// It includes a custom query method to search employees based on various filters such as ID, name, department, and minimum date of birth.
+// The searchEmployees method uses JPQL to filter results based on the provided parameters, allowing for flexible searching.
+// 

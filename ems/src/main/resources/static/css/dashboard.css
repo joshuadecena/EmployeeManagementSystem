@@ -1,0 +1,13 @@
+//CSS for the dashboard page
+  .sort-button {
+    cursor: pointer;
+    font-size: 0.8rem;
+    user-select: none;
+    margin-left: 6px;
+    color: #ddd;
+	display: inline-block;
+    padding: 2px 4px;
+  }
+  .sort-button.active {
+    color: #fff;
+  }

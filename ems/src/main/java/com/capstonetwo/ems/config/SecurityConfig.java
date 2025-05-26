@@ -14,50 +14,48 @@ import org.springframework.http.HttpMethod;
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder encoder) {
-        UserDetails user = User.builder()
-                .username("user")
-                .password(encoder.encode("password"))
-                .roles("USER")
-                .build();
+	@Bean
+	public InMemoryUserDetailsManager userDetailsService(PasswordEncoder encoder) {
+		UserDetails user = 
+				User.builder()
+				.username("user")
+				.password(encoder.encode("password"))
+				.roles("USER").build();
 
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(encoder.encode("admin123"))
-                .roles("ADMIN")
-                .build();
+		UserDetails admin = 
+				User.builder()
+				.username("admin")
+				.password(encoder.encode("admin123"))
+				.roles("ADMIN")
+				.build();
 
-        return new InMemoryUserDetailsManager(user, admin);
-    }
+		return new InMemoryUserDetailsManager(user, admin);
+	}
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf().disable()
-            .authorizeHttpRequests(auth -> auth
-                // GET is allowed for USER and ADMIN
-                .requestMatchers(HttpMethod.GET, "/api/employees/**").hasAnyRole("USER", "ADMIN")
-                // POST, PUT, DELETE are ADMIN-only
-                .requestMatchers(HttpMethod.POST, "/api/employees/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/employees/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasRole("ADMIN")
-                // allow everything else (like login form)
-                .anyRequest().permitAll()
-            )
-            .formLogin(form -> form
-            		.defaultSuccessUrl("/home.html", true)
-            )
-            .logout(logout -> logout
-            		.logoutUrl("/logout")
-            		.logoutSuccessUrl("/")
-            );
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http
+				.csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity
+				.authorizeHttpRequests(auth -> auth
+				// GET is allowed for USER and ADMIN
+				.requestMatchers(HttpMethod.GET, "/api/employees/**").hasAnyRole("USER", "ADMIN")
+				
+				// POST, PUT, DELETE are ADMIN-only
+				.requestMatchers(HttpMethod.POST, "/api/employees/**").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/employees/**").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasRole("ADMIN")
+				
+				// allow everything else (like login form)
+				.anyRequest()
+				.permitAll())
+				.formLogin(form -> form.defaultSuccessUrl("/home.html", true))
+				.logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/"));
 
-        return http.build();
-    }
+		return http.build();
+	}
 }

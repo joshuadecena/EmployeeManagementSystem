@@ -171,6 +171,21 @@ public class EmployeeServiceTest {
 
 	    verify(employeeRepository, times(1)).deleteById(empId);
 	}
+	
+	@Test
+	void testGetAverageSalary_ReturnsCorrectValue() {
+		List<Employee> employees = Arrays.asList(
+			new Employee() {{ setSalary(50000.0); }},
+			new Employee() {{ setSalary(60000.0); }},
+			new Employee() {{ setSalary(70000.0); }}
+		);
 
+		when(employeeRepository.findAll()).thenReturn(employees);
 
+		double avgSalary = employeeService.getAverageSalary();
+
+		assertEquals(60000.0, avgSalary, 0.001);
+		verify(employeeRepository, times(1)).findAll();
+
+		}
 }
