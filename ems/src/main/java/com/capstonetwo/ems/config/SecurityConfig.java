@@ -14,48 +14,61 @@ import org.springframework.http.HttpMethod;
 @Configuration
 public class SecurityConfig {
 
-	@Bean
-	public InMemoryUserDetailsManager userDetailsService(PasswordEncoder encoder) {
-		UserDetails user = 
-				User.builder()
-				.username("user")
-				.password(encoder.encode("password"))
-				.roles("USER").build();
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder encoder) {
+        UserDetails user = User.builder()
+                .username("user")
+                .password(encoder.encode("password"))
+                .roles("USER")
+                .build();
 
-		UserDetails admin = 
-				User.builder()
-				.username("admin")
-				.password(encoder.encode("admin123"))
-				.roles("ADMIN")
-				.build();
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(encoder.encode("admin123"))
+                .roles("ADMIN")
+                .build();
 
-		return new InMemoryUserDetailsManager(user, admin);
-	}
+        return new InMemoryUserDetailsManager(user, admin);
+    }
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-				.csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity
-				.authorizeHttpRequests(auth -> auth
-				// GET is allowed for USER and ADMIN
-				.requestMatchers(HttpMethod.GET, "/api/employees/**").hasAnyRole("USER", "ADMIN")
-				
-				// POST, PUT, DELETE are ADMIN-only
-				.requestMatchers(HttpMethod.POST, "/api/employees/**").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.PUT, "/api/employees/**").hasRole("ADMIN")
-				.requestMatchers(HttpMethod.DELETE, "/api/employees/**").hasRole("ADMIN")
-				
-				// allow everything else (like login form)
-				.anyRequest()
-				.permitAll())
-				.formLogin(form -> form.defaultSuccessUrl("/home.html", true))
-				.logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/"));
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable()) // Disable CSRF for development
+            .authorizeHttpRequests(auth -> auth
+                // ALLOW USER and ADMIN to GET (view/search)
+                .requestMatchers(HttpMethod.GET, "/api/employees/**", "/api/departments/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/employee/**", "/department/**").hasAnyRole("USER", "ADMIN")
 
-		return http.build();
-	}
+                // Only ADMIN can POST, PUT, DELETE (modify)
+                .requestMatchers(HttpMethod.POST, "/api/employees/**", "/api/departments/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/employees/**", "/api/departments/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/employees/**", "/api/departments/**").hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.POST, "/employee/**", "/department/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/employee/*/edit", "/department/*/edit").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/employee/*/delete", "/department/*/delete").hasRole("ADMIN")
+
+                // Allow everything else
+                .anyRequest().permitAll()
+            )
+            .formLogin(form -> form
+            	.loginPage("/login") //custom login view at /login
+            	.loginProcessingUrl("/login") 
+                .defaultSuccessUrl("/home", true)
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout") // Redirect to login with logout message
+                .permitAll()
+            );
+
+        return http.build();
+    }
 }

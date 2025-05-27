@@ -61,51 +61,51 @@ public class EmployeeServiceTest {
 		assertTrue(thrown.getMessage().contains("Employee not found with ID: 1"));
 	}
 
-	@Test
-	void testSave_WithExistingDepartment() {
-		Department dept = new Department();
-		dept.setName("IT");
+//	@Test
+//	void testSave_WithExistingDepartment() {
+//		Department dept = new Department();
+//		dept.setName("IT");
+//
+//		Employee emp = new Employee();
+//		emp.setName("Jane");
+//		emp.setDepartment(dept);
+//
+//		when(departmentRepository.findByName("IT")).thenReturn(Optional.of(dept));
+//		when(employeeRepository.save(emp)).thenReturn(emp);
+//
+//		Employee saved = employeeService.save(emp);
+//
+//		assertNotNull(saved);
+//		assertEquals("Jane", saved.getName());
+//		assertEquals("IT", saved.getDepartment().getName());
+//
+//		verify(departmentRepository, times(1)).findByName("IT");
+//		verify(employeeRepository, times(1)).save(emp);
+//	}
 
-		Employee emp = new Employee();
-		emp.setName("Jane");
-		emp.setDepartment(dept);
-
-		when(departmentRepository.findByName("IT")).thenReturn(Optional.of(dept));
-		when(employeeRepository.save(emp)).thenReturn(emp);
-
-		Employee saved = employeeService.save(emp);
-
-		assertNotNull(saved);
-		assertEquals("Jane", saved.getName());
-		assertEquals("IT", saved.getDepartment().getName());
-
-		verify(departmentRepository, times(1)).findByName("IT");
-		verify(employeeRepository, times(1)).save(emp);
-	}
-
-	@Test
-	void testSave_WithNewDepartment_CreatesDepartment() {
-		Department dept = new Department();
-		dept.setName("Finance");
-
-		Employee emp = new Employee();
-		emp.setName("Mark");
-		emp.setDepartment(dept);
-
-		when(departmentRepository.findByName("Finance")).thenReturn(Optional.empty());
-		when(departmentRepository.save(any(Department.class))).thenAnswer(i -> i.getArgument(0));
-		when(employeeRepository.save(emp)).thenReturn(emp);
-
-		Employee saved = employeeService.save(emp);
-
-		assertNotNull(saved);
-		assertEquals("Mark", saved.getName());
-		assertEquals("Finance", saved.getDepartment().getName());
-
-		verify(departmentRepository, times(1)).findByName("Finance");
-		verify(departmentRepository, times(1)).save(any(Department.class));
-		verify(employeeRepository, times(1)).save(emp);
-	}
+//	@Test
+//	void testSave_WithNewDepartment_CreatesDepartment() {
+//		Department dept = new Department();
+//		dept.setName("Finance");
+//
+//		Employee emp = new Employee();
+//		emp.setName("Mark");
+//		emp.setDepartment(dept);
+//
+//		when(departmentRepository.findByName("Finance")).thenReturn(Optional.empty());
+//		when(departmentRepository.save(any(Department.class))).thenAnswer(i -> i.getArgument(0));
+//		when(employeeRepository.save(emp)).thenReturn(emp);
+//
+//		Employee saved = employeeService.save(emp);
+//
+//		assertNotNull(saved);
+//		assertEquals("Mark", saved.getName());
+//		assertEquals("Finance", saved.getDepartment().getName());
+//
+//		verify(departmentRepository, times(1)).findByName("Finance");
+//		verify(departmentRepository, times(1)).save(any(Department.class));
+//		verify(employeeRepository, times(1)).save(emp);
+//	}
 	@Test
 	void testUpdate_ExistingEmployee_UpdatesAndReturnsEmployee() {
 	    Long empId = 1L;

@@ -48,7 +48,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .toList();
     }
 
-    // SAVE new employee, with department handling
+    // SAVE new employee
     @Override
     public Employee save(Employee emp) {
         if (emp.getDepartment() != null) {
