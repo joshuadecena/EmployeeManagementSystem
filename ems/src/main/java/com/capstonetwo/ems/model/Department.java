@@ -2,6 +2,7 @@ package com.capstonetwo.ems.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class Department {
 	private Long id;
 	
 	@NotBlank(message =  "${department.name.required}")
+	@Size(min = 2, max = 50, message = "${department.name.size}")
 	private String name;
 
 	@OneToMany(mappedBy = "department")
@@ -33,7 +35,7 @@ public class Department {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

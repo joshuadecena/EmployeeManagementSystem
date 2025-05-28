@@ -45,12 +45,12 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-			<li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
-			<li class="nav-item"><a class="nav-link" href="/search">Search</a></li>
-			<li class="nav-item"><a class="nav-link" href="/add">Add</a></li>
-			<li class="nav-item"><a class="nav-link active" href="/update">Update</a></li>
-			<li class="nav-item"><a class="nav-link" href="/delete">Delete</a></li>
-			<li class="nav-item"><a class="nav-link" href="/login">Logout</a></li>
+          <li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/search">Search</a></li>
+          <li class="nav-item"><a class="nav-link" href="/add">Add</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/update">Update</a></li>
+          <li class="nav-item"><a class="nav-link" href="/delete">Delete</a></li>
+          <li class="nav-item"><a class="nav-link" href="/login">Logout</a></li>
         </ul>
       </div>
     </div>
@@ -65,12 +65,9 @@
       <div class="col-md-2"><input type="number" class="form-control" id="searchId" placeholder="ID" min="1" /></div>
       <div class="col-md-3"><input type="text" class="form-control" id="searchName" placeholder="Name" /></div>
       <div class="col-md-3">
-        <select id="searchDepartment" class="form-select">
+        <select id="searchDepartment" class="form-select" >
           <option value="">-- Department --</option>
-          <option value="IT">IT</option>
-          <option value="HR">HR</option>
-          <option value="Finance">Finance</option>
-          <option value="Marketing">Marketing</option>
+          <!-- Options populated dynamically -->
         </select>
       </div>
       <div class="col-md-2"><input type="number" class="form-control" id="searchMinAge" placeholder="Age" min="18" /></div>
@@ -115,23 +112,20 @@
             <label for="editDepartment" class="form-label">Department</label>
             <select id="editDepartment" class="form-select" required>
               <option value="">-- Select Department --</option>
-              <option value="IT">IT</option>
-              <option value="HR">HR</option>
-              <option value="Finance">Finance</option>
-              <option value="Marketing">Marketing</option>
+              <!-- Options populated dynamically -->
             </select>
           </div>
           <div class="mb-3">
             <label for="editDateOfBirth" class="form-label">Date of Birth</label>
             <input type="date" id="editDateOfBirth" class="form-control" required />
           </div>
-		  <div class="mb-3">
-		    <label for="editSalary" class="form-label">Salary</label>
-		    <div class="input-group">
-		      <span class="input-group-text">₱</span>
-		      <input type="number" step="0.01" min="0" id="editSalary" class="form-control" required />
-		    </div>
-		  </div>
+          <div class="mb-3">
+            <label for="editSalary" class="form-label">Salary</label>
+            <div class="input-group">
+              <span class="input-group-text">₱</span>
+              <input type="number" step="0.01" min="0" id="editSalary" class="form-control" required />
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -157,8 +151,13 @@
     const searchForm = document.getElementById("searchForm");
     const resultsBody = document.getElementById("resultsBody");
     const editModal = new bootstrap.Modal(document.getElementById("editModal"));
-    let currentEmployees = [];
+    const searchDepartment = document.getElementById("searchDepartment");
+    const editDepartment = document.getElementById("editDepartment");
 
+    let currentEmployees = [];
+    let departments = [];
+
+    // Utility: Calculate age from date of birth string
     function calculateAge(dobString) {
       if (!dobString) return "";
       const today = new Date();
@@ -170,18 +169,20 @@
       return age;
     }
 
+    // Format date as yyyy-mm-dd
     function formatDate(dateStr) {
       const d = new Date(dateStr);
       return isNaN(d) ? "N/A" : d.toISOString().split("T")[0];
     }
 
+    // Render one employee row
     function getRowHTML(emp) {
       const dept = emp.department?.name || emp.department || "N/A";
       const dob = formatDate(emp.dateOfBirth);
       const age = emp.dateOfBirth ? calculateAge(emp.dateOfBirth) : "N/A";
-	  const salary = emp.salary !== undefined
-	    ? `₱${Number(emp.salary).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`
-	    : "N/A";
+      const salary = emp.salary !== undefined
+        ? `₱${Number(emp.salary).toLocaleString("en-PH", { minimumFractionDigits: 2 })}`
+        : "N/A";
       return `
         <tr data-id="${emp.id}">
           <td>${emp.id}</td>
@@ -195,6 +196,7 @@
       `;
     }
 
+    // Render the employee table
     function renderTable(data) {
       resultsBody.innerHTML = data.length
         ? data.map(emp => getRowHTML(emp)).join("")
@@ -202,6 +204,7 @@
       addEditListeners();
     }
 
+    // Add edit button listeners
     function addEditListeners() {
       document.querySelectorAll(".edit-btn").forEach(btn => {
         btn.addEventListener("click", e => {
@@ -215,66 +218,23 @@
       });
     }
 
+    // Fill edit modal fields
     function fillEditModal(emp) {
       document.getElementById("editId").value = emp.id;
       document.getElementById("editName").value = emp.name || "";
-      document.getElementById("editDepartment").value = emp.department?.name || emp.department || "";
+      // For department, match the value with option value:
+      if (emp.department?.name) {
+        editDepartment.value = emp.department.name;
+      } else if (typeof emp.department === "string") {
+        editDepartment.value = emp.department;
+      } else {
+        editDepartment.value = "";
+      }
       document.getElementById("editDateOfBirth").value = formatDate(emp.dateOfBirth);
       document.getElementById("editSalary").value = emp.salary !== undefined ? Number(emp.salary).toFixed(2) : "";
     }
 
-    document.getElementById("editForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const id = document.getElementById("editId").value;
-      const name = document.getElementById("editName").value.trim();
-      const department = document.getElementById("editDepartment").value;
-      const dateOfBirth = document.getElementById("editDateOfBirth").value;
-      const salary = parseFloat(document.getElementById("editSalary").value);
-
-      if (!name || !department || !dateOfBirth || isNaN(salary)) {
-        alert("Please fill all required fields correctly.");
-        return;
-      }
-
-      const payload = { id: Number(id), name, department, dateOfBirth, salary };
-
-      try {
-        const res = await fetch(`/api/employees/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error("Failed to update");
-
-        const index = currentEmployees.findIndex(emp => emp.id == id);
-        if (index > -1) currentEmployees[index] = { ...currentEmployees[index], ...payload };
-        renderTable(currentEmployees);
-        editModal.hide();
-
-        const toastEl = document.getElementById("updateToast");
-        const toast = new bootstrap.Toast(toastEl);
-        toast.show();
-
-      } catch (err) {
-        alert("Update failed: " + err.message);
-      }
-    });
-
-    searchForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const params = new URLSearchParams();
-      if (searchId.value) params.append("id", searchId.value);
-      if (searchName.value) params.append("name", searchName.value);
-      if (searchDepartment.value) params.append("department", searchDepartment.value);
-      if (searchMinAge.value) params.append("minAge", searchMinAge.value);
-      fetchEmployees("?" + params.toString());
-    });
-
-    document.getElementById("resetButton").addEventListener("click", () => {
-      searchForm.reset();
-      fetchEmployees();
-    });
-
+    // Fetch employees with optional query params
     async function fetchEmployees(query = "") {
       try {
         const res = await fetch(`/api/employees/search${query}`);
@@ -287,7 +247,103 @@
       }
     }
 
-    fetchEmployees();
+    // Fetch departments and populate dropdowns
+    async function fetchDepartments() {
+      try {
+        const res = await fetch("/api/departments");
+        if (!res.ok) throw new Error("Failed to fetch departments");
+        departments = await res.json();
+        populateDepartmentDropdowns();
+      } catch (err) {
+        console.error("Error fetching departments:", err);
+      }
+    }
+
+    // Populate both department dropdowns
+    function populateDepartmentDropdowns() {
+      // Clear existing options except default
+      searchDepartment.innerHTML = `<option value="">-- Department --</option>`;
+      editDepartment.innerHTML = `<option value="">-- Select Department --</option>`;
+      departments.forEach(dep => {
+        const option1 = document.createElement("option");
+        option1.value = dep.name;
+        option1.textContent = dep.name;
+        searchDepartment.appendChild(option1);
+
+        const option2 = document.createElement("option");
+        option2.value = dep.name;
+        option2.textContent = dep.name;
+        editDepartment.appendChild(option2);
+      });
+    }
+
+    // Handle search form submit
+    searchForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const id = document.getElementById("searchId").value.trim();
+      const name = document.getElementById("searchName").value.trim();
+      const department = searchDepartment.value;
+      const minAge = document.getElementById("searchMinAge").value.trim();
+
+      // Build query string
+      let queryParts = [];
+      if (id) queryParts.push(`id=${encodeURIComponent(id)}`);
+      if (name) queryParts.push(`name=${encodeURIComponent(name)}`);
+      if (department) queryParts.push(`department=${encodeURIComponent(department)}`);
+      if (minAge) queryParts.push(`age=${encodeURIComponent(minAge)}`);
+
+      fetchEmployees(queryParts.length ? `?${queryParts.join("&")}` : "");
+    });
+
+    // Reset button clears inputs and fetches all employees
+    document.getElementById("resetButton").addEventListener("click", () => {
+      searchForm.reset();
+      fetchEmployees();
+    });
+
+    // Edit form submit handler
+    document.getElementById("editForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const id = document.getElementById("editId").value;
+      const name = document.getElementById("editName").value.trim();
+      const department = editDepartment.value;
+      const dateOfBirth = document.getElementById("editDateOfBirth").value;
+      const salary = document.getElementById("editSalary").value.trim();
+
+      if (!name || !department || !dateOfBirth || salary === "") {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const data = { name, department, dateOfBirth, salary: parseFloat(salary) };
+      try {
+        const res = await fetch(`/api/employees/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to update employee");
+
+        // Update local cache to reflect change
+        const idx = currentEmployees.findIndex(emp => emp.id == id);
+        if (idx !== -1) {
+          currentEmployees[idx] = { ...currentEmployees[idx], ...data };
+          renderTable(currentEmployees);
+        }
+        editModal.hide();
+
+        // Show toast notification
+        const toastEl = document.getElementById("updateToast");
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+      } catch (err) {
+        alert("Error updating employee.");
+        console.error(err);
+      }
+    });
+
+    // Initial load: fetch departments and all employees
+    fetchDepartments().then(() => fetchEmployees());
   </script>
 </body>
 </html>

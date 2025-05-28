@@ -31,14 +31,9 @@ public class PageController {
         return "delete";  // maps to delete.html
     }
     
-    @GetMapping("/form")
-    public String form() {
-        return "form"; // maps to form.html
-    }
-    
-    @GetMapping("/list")
-    public String list() {
-        return "list"; // maps to list.html
-    }
+    @GetMapping("/manage")
+    public String manage() {
+		return "admin/departments/manage";  // maps to manage.html
+	}
 }
 

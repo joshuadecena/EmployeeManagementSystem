@@ -3,17 +3,19 @@ package com.capstonetwo.ems.controller;
 import com.capstonetwo.ems.model.Department;
 import com.capstonetwo.ems.service.DepartmentService;
 
+//import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+//import org.springframework.security.web.csrf.CsrfToken;
 
 @Controller
-@RequestMapping("${department.web.base}")
+@RequestMapping("/departments")  // e.g. "/departments"
 public class DepartmentWebController {
 
     @Autowired
@@ -26,16 +28,24 @@ public class DepartmentWebController {
     @GetMapping
     public String listDepartments(Model model) {
         model.addAttribute("departments", departmentService.getAll());
-        model.addAttribute("departmentWebBase", departmentWebBase);  // add here
-        return "department/list";
+        model.addAttribute("departmentWebBase", departmentWebBase);  
+        return "department/list";  
     }
+    
+//    @GetMapping("/manage")
+//    public String manage(Model model, HttpServletRequest request) {
+//    	CsrfToken csrfToken = (CsrfToken) request.getAttribute("_csrf");
+//    	model.addAttribute("_csrf", csrfToken);
+//    	model.addAttribute("departments", departmentService.getAll());
+//    	return "admin/departments/manage";  // maps to manage.html
+//    }
 
     // Show form to create a new department
     @GetMapping("/new")
     public String createDepartmentForm(Model model) {
         model.addAttribute("department", new Department());
-        model.addAttribute("departmentWebBase", departmentWebBase);  // add here
-        return "department/form";
+        model.addAttribute("departmentWebBase", departmentWebBase);  
+        return "department/form";  
     }
 
     // Save a new department
@@ -43,7 +53,7 @@ public class DepartmentWebController {
     public String saveDepartment(@Valid @ModelAttribute Department department, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("departmentWebBase", departmentWebBase);
-            return "department/form";  // Return form with error messages
+            return "department/form";  // return with validation errors
         }
         departmentService.save(department);
         return "redirect:" + departmentWebBase;
@@ -53,7 +63,7 @@ public class DepartmentWebController {
     @GetMapping("/{id}/edit")
     public String editDepartmentForm(@PathVariable Long id, Model model) {
         model.addAttribute("department", departmentService.getById(id));
-        model.addAttribute("departmentWebBase", departmentWebBase);  // add here
+        model.addAttribute("departmentWebBase", departmentWebBase);  
         return "department/form";
     }
 
@@ -62,16 +72,23 @@ public class DepartmentWebController {
     public String updateDepartment(@PathVariable Long id, @Valid @ModelAttribute Department department, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("departmentWebBase", departmentWebBase);
-            return "department/form";  // Return form with error messages
+            return "department/form";  // return with validation errors
         }
         departmentService.update(id, department);
         return "redirect:" + departmentWebBase;
     }
 
-    // Delete a department
-    @GetMapping("/{id}/delete")
-    public String deleteDepartment(@PathVariable Long id) {
+//     Delete a department
+//    @PostMapping("/{id}/delete")
+//    public String deleteDepartment(@PathVariable Long id) {
+//        departmentService.delete(id);
+//        return "redirect:" + departmentWebBase;
+//    }
+    
+    @PostMapping("/delete")
+    public String deleteDepartment(@RequestParam("id") Long id) {
         departmentService.delete(id);
-        return "redirect:" + departmentWebBase;
+        return "redirect:/admin/departments/manage";
     }
+
 }
